@@ -70,7 +70,12 @@ const baseRoute = [
         path: '',
         name: '我的',
         component: () => import('@/views/mine/index'),
-      }
+      },
+      {
+        path: '/mine/item/add',
+        name: '添加商品',
+        component: () => import('@/views/mine/item/add'),
+      },
     ],
     hidden: true,
   },

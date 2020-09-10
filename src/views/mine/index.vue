@@ -66,7 +66,7 @@ export default {
 
     },
     handleAdd() {
-      window.location.href = '/#/item/add'
+      window.location.href = '/#/mine/item/add'
     }
   },
 }

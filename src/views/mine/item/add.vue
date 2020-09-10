@@ -3,8 +3,8 @@
     <v-header ref="vHeader" :title="'补充用户信息'" :back="'/account/code'"/>
     <div class="form">
       <mt-field 
-        label="用户名" 
-        placeholder="请输入用户名" 
+        label="商品名称" 
+        placeholder="请输入商品名称" 
         v-model="form.name" 
         :state="this.state.name"
       />
@@ -30,38 +30,20 @@
         v-model="form.encryptPassword"
         :state="this.state.encryptPassword"
       />
-      <mt-field 
-        label="性别" 
-        placeholder="请选择性别" 
-        readonly
-        v-model="genderLabel"
-        :state="this.state.gender"
-      >
-        <mt-radio
-          v-model="form.gender"
-          :options="[
-          {label: '男',value: '1'},
-          {label: '女',value: '2'}
-          ]" 
-          @change="handleRadio"
-        />
-      </mt-field>
-      <mt-field 
-        label="年龄" 
-        placeholder="请选择年龄" 
-        readonly
-        v-model="form.age"
-        :state="this.state.age"
-      >
-        <mt-picker :slots="slots" @change="handlePicker" />
-      </mt-field>
       
-      <mt-button class="button" type="primary" @click="handleRegister">注册</mt-button>
+      
+      <mt-button 
+        class="button" 
+        type="primary" 
+        @click="handleRegister"
+      >
+      添加
+      </mt-button>
     </div>
   </div>
 </template>
 <script>
-import userApi from '../../api/user'
+import userApi from '@/api/user'
 import vHeader from '@/layout/Header'
 import Vue from 'vue'
 import { Field } from 'mint-ui'
@@ -110,11 +92,7 @@ export default {
     }
   },
   mounted() {
-    if(!this.$route.query.telephone) {
-      window.location.href = "/#/account/code";
-      return;
-    }
-    this.form.telephone = this.$route.query.telephone
+    
   },
   methods: {
     handleRadio(value) {

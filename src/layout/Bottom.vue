@@ -1,5 +1,6 @@
 <template>
   <mt-tabbar 
+    v-if="isShow"
     @click.native="handleClick" 
     :fixed="true" 
     class="app-bottom" 
@@ -37,6 +38,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import Vue from 'vue'
 import { Tabbar, TabItem } from 'mint-ui';
 Vue.component(Tabbar.name, Tabbar);
@@ -56,6 +58,12 @@ export default {
     handleClick() {
       window.location.href = '/#/' + this.selected
     }
+  },
+  computed: {
+    ...mapGetters(['bottom']),
+    isShow() {
+      return this.bottom.show;
+    },
   },
 }
 </script>

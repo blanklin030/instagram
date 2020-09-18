@@ -21,7 +21,7 @@ export default {
   margin-bottom: 50px;
   // position: fixed;
   // padding: 20px;
-  min-height: calc(100vh - 0px);
+  // min-height: calc(100vh - 0px);
   overflow: hidden;
 }
 </style>

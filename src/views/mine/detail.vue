@@ -1,6 +1,5 @@
 <template>
   <div class="login">
-    <v-header ref="vHeader" :title="'补充用户信息'" :back="'/account/code'"/>
     <div class="form">
 
       <div class="avatar">
@@ -33,13 +32,6 @@
         :state="this.state.telephone"
       />
       <mt-field 
-        label="密码" 
-        placeholder="请输入密码" 
-        type="encryptPassword" 
-        v-model="form.encryptPassword"
-        :state="this.state.encryptPassword"
-      />
-      <mt-field 
         label="性别" 
         placeholder="请选择性别" 
         readonly
@@ -69,16 +61,16 @@
         class="button" 
         type="primary" 
         @click="handleUpload"
-      >注册</mt-button>
+      >更新</mt-button>
 
     </div>
   </div>
 </template>
 <script>
-import uploader from '../../components/uploader';
+import uploader from '@/components/uploader';
 import localAvatar from '@/assets/images/mine/avatar.png';
-import userApi from '../../api/user'
-import vHeader from '@/layout/Header'
+import userApi from '@/api/user'
+import userTool from '../../assets/utils/user';
 import Vue from 'vue'
 import { Field } from 'mint-ui'
 import { Button } from 'mint-ui'
@@ -93,7 +85,7 @@ Vue.component(Button.name, Button)
 Vue.component(Toast.name, Toast)
 
 export default {
-  components: { vHeader,  uploader },
+  components: { uploader },
   data() {
     return {
       form: {
@@ -102,7 +94,6 @@ export default {
         gender: '',
         email: '',
         telephone: '',
-        encryptPassword: '',
         avatar: localAvatar,
       },
       state: {
@@ -111,7 +102,6 @@ export default {
         gender: '',
         email: '',
         telephone: '',
-        encryptPassword: '',
         avatar: '',
       },
       genderLabel:"",
@@ -123,16 +113,15 @@ export default {
         }
       ],
       isPreview: false,
+      isUpload: false,
       count: 0,
       timer: null,
     }
   },
   mounted() {
-    if(!this.$route.query.telephone) {
-      window.location.href = "/#/account/code";
-      return;
-    }
-    this.form.telephone = this.$route.query.telephone
+    this.$store.dispatch('SetBottom', true)
+    this.$store.dispatch('SetHeaderBack', {show:true, url:'/#/mine'});
+    this.getUserInfo()
   },
   methods: {
     notice(action) {
@@ -144,6 +133,7 @@ export default {
           }
           this.form.avatar = avatar[Object.keys(avatar)[0]]
           this.isPreview = true
+          this.isUpload = true
           break;
         case 'upload':
           avatar = this.$refs.uploader.getUploadImg()
@@ -152,7 +142,7 @@ export default {
           }
           this.form.avatar = avatar[Object.keys(avatar)[0]]
           this.isPreview = true
-          this.handleRegister()
+          this.handleEdit()
           break
         default:
           break;
@@ -165,12 +155,15 @@ export default {
       this.form.age = picker.getSlotValue(0);
     },
     handleUpload() {
-      this.$refs.uploader.handleUpload()
+      if (this.isUpload) {
+        this.$refs.uploader.handleUpload()  
+      } else {
+        this.handleEdit()
+      }
     },
-    handleRegister() {
+    handleEdit() {
       const dict = {
         name:"用户名",
-        encryptPassword:"密码",
         email:"邮箱",
         gender:"性别",
         telephone:"手机号",
@@ -187,47 +180,21 @@ export default {
           return false
         }
       }
-      userApi.register(this.form).then((res) => {
+      userApi.edit(this.form).then((res) => {
         if (res.status === "success") {
-          Toast({
-            message: '注册成功'
-          })
-          window.location.href = "/#/account/login"
+          Toast({message: '修改成功'})
+          userTool.saveStorage()
+          window.location.href = "/#/mine"
         }
       })
     },
-    handleCode() {
-      if (this.form.telephone.length <= 0) {
-        Toast({
-          message: '请先填写手机号',
-        })
-        this.state.telephone = "warning"
-        return false
-      }
-      userApi.getCode(this.form.telephone).then((res) => {
+    getUserInfo() {
+      userApi.getInfo().then((res) => {
         if (res.status === "success") {
-          Toast({
-            message: '验证码已发送至手机，请注意查收',
-            iconClass: 'icon icon-success'
-          })
-          this.countDown(60)
+          this.isPreview = res.data.avatar.length != 0 ? true: false
+          this.form = {...res.data}
         }
       })
-    },
-    countDown(total) {
-      if (this.timer) {
-        return false;
-      }
-      this.count = total;
-      this.timer = setInterval(() => {
-        if (this.count > 0 && this.count <= total) {
-          this.count -= 1;
-        } else {
-          clearInterval(this.timer);
-          this.timer = null;
-        }
-      }, 1000);
-      return true;
     },
   },
 }

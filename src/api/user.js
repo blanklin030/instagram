@@ -1,15 +1,18 @@
 import Request from '../assets/utils/request';
+import userTool from '../assets/utils/user';
+import { Toast } from 'mint-ui';
 
 export default {
   register(params) {
     return Request.Post('/user/register', params);
   },
+
   checkCode(code,telephone) {
     return Request.Post('/user/check', {captcha: code,telephone});
   },
 
-  login(telephone, encryptPassword) {
-    return Request.Put('/user/login', { telephone, encryptPassword });
+  login(name, password) {
+    return Request.Put('/user/login?name=' + name + '&password=' + password );
   },
 
   logout(username) {
@@ -20,8 +23,24 @@ export default {
     return Request.Get('/user/code?telephone=' + telephone);
   },
 
-  getInfo(username) {
-    return Request.Get('/user/info', { username });
+  getInfo() {
+    const token = userTool.getToken() || null
+    if (!token) {
+      Toast({
+        message: '非法操作！请先登陆！',
+      })
+      window.location.href = '/#/account/login'
+      return false
+    }
+    return Request.Get('/user/info');
+  },
+
+  edit(params) {
+    return Request.Put('/user/edit', params);
+  },
+
+  getList(page, size) {
+    return Request.Get(`/user/list?page=${page}&size=${size}`);
   },
 
 };

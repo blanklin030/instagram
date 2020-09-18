@@ -55,6 +55,9 @@ export default {
       timer: null,
     }
   },
+  mounted() {
+    this.$store.dispatch('SetHeaderBack', {show:true,url:'/#/account/login'});
+  },
   methods: {
     handleRadio(value) {
       this.genderLabel = {1:"男",2:"女"}[value];

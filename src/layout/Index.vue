@@ -19,7 +19,7 @@ export default {
 </script>
 <style lang="scss">
 .app-container {
-  height: 100vh;
+  // height: 100vh;
   width: 100vw;
 }
 </style>

@@ -3,10 +3,10 @@
     <v-header ref="vHeader" :title="'登陆账号'" :back="'/account/code'"/>
     <div class="form">
       <mt-field 
-        label="手机号" 
-        placeholder="请输入手机号" 
-        v-model="form.telephone" 
-        :state="this.state.telephone"
+        label="用户名" 
+        placeholder="请输入用户名" 
+        v-model="form.name" 
+        :state="this.state.name"
       />
    
       <mt-field 
@@ -16,11 +16,18 @@
         v-model="form.password"
         :state="this.state.password"
       />
-      <mt-button class="button" type="primary" @click="handleLogin">登陆</mt-button>
+    </div>
+    <div class="btn-div">
+      <mt-button 
+        class="btn" 
+        type="primary" 
+        @click="handleLogin"
+      >登陆</mt-button>
     </div>
   </div>
 </template>
 <script>
+import userUtil from '@/assets/utils/user';
 import userApi from '../../api/user'
 import vHeader from '@/layout/Header'
 import Vue from 'vue'
@@ -41,11 +48,12 @@ export default {
   data() {
     return {
       form: {
-        telephone: '',
+        name: '',
         password: '',
       },
       state: {
-        telephone: '',
+        name: '',
+        password: '',
       },
       genderLabel:"",
       slots: [
@@ -55,23 +63,20 @@ export default {
           className: 'slot1',
         }
       ],
-      
+      redirect: null,
       count: 0,
       timer: null,
     }
   },
+  mounted() {
+    this.$store.dispatch('SetHeaderBack', {show:true,url:'/#/account/register'});
+    this.redirect = this.$route.query.redirect;
+  },
   methods: {
-    handleRadio(value) {
-      this.genderLabel = {1:"男",2:"女"}[value];
-    },
-    handlePicker(picker, values) {
-      console.log(picker, values)
-      this.form.age = picker.getSlotValue(0);
-    },
     handleLogin() {
       const dict = {
         password:"密码",
-        telephone:"手机号",
+        name:"用户名",
       }
       for (const key in this.form) {
         const element = this.form[key];
@@ -83,24 +88,29 @@ export default {
           return false
         }
       }
-      userApi.login(this.form.telephone, this.form.password).then((res) => {
+      userApi.login(this.form.name, this.form.password).then((res) => {
         if (res.status === "success") {
           Toast({
             message: '登陆成功'
           })
+          userUtil.setToken(res.data);
+          userUtil.saveStorage();
+          if (this.redirect) {
+            window.location.href = this.redirect
+          }
           window.location.href = "/#/index"
         }
       })
     },
     handleCode() {
-      if (this.form.telephone.length <= 0) {
+      if (this.form.name.length <= 0) {
         Toast({
           message: '请先填写手机号',
         })
-        this.state.telephone = "warning"
+        this.state.name = "warning"
         return false
       }
-      userApi.getCode(this.form.telephone).then((res) => {
+      userApi.getCode(this.form.name).then((res) => {
         if (res.status === "success") {
           Toast({
             message: '验证码已发送至手机，请注意查收',
@@ -132,9 +142,12 @@ export default {
 .login {
   .form {
     margin-top: 80px;
-    .button {
+  }
+  .btn-div {
+    width: 90%;
+    margin: 20px auto;
+    .btn {
       width: 100%;
-      margin-top: 10px;
     }
   }
 }

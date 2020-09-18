@@ -63,6 +63,22 @@ const baseRoute = [
     hidden: true,
   },
   {
+    path: '/item',
+    component: () => import('@/layout/Index'),
+    children: [
+      {
+        path: '/item/add',
+        name: '创建商品',
+        component: () => import('@/views/item/add'),
+      },
+      {
+        path: '/item/detail',
+        name: '商品详情',
+        component: () => import('@/views/item/detail'),
+      },
+    ],
+  },
+  {
     path: '/mine',
     component: () => import('@/layout/Index'),
     children: [
@@ -72,9 +88,9 @@ const baseRoute = [
         component: () => import('@/views/mine/index'),
       },
       {
-        path: '/mine/item/add',
-        name: '添加商品',
-        component: () => import('@/views/mine/item/add'),
+        path: '/mine/detail',
+        name: '我的资料',
+        component: () => import('@/views/mine/detail'),
       },
     ],
     hidden: true,

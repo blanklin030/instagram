@@ -11,9 +11,5 @@ export default {
 };
 </script>
 <style lang="scss">
-body
-#app {
-  height: 100vh;
-  width: 100vw;
-}
+
 </style>

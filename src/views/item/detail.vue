@@ -3,11 +3,11 @@
     <div class="top">
       <div class="left">
         <div class="avatar">
-          <img :src="userInfo.avatar" />
+          <img :src="info.businessAvatar" />
         </div>
         <div class="people">
-          <div class="name">{{userInfo.name}}</div>
-          <div class="time">2020-09-09</div>
+          <div class="name">{{ info.businessName }}</div>
+          <div class="time">{{ this.clock }}</div>
         </div>
       </div>
       <div class="right">
@@ -16,7 +16,7 @@
       </div>
     </div>
     <div class="money">
-      <span class="price item">
+      <span :class="'price item'+(info.promoStatus>1?' promo-text':'')">
         ¥{{info.price}}元
         <div>价格：<img src="@/assets/images/mine/jg.png" /></div>
       </span>
@@ -30,7 +30,9 @@
       </span>
     </div>
     <div class="title">
-      <span class="tag">秒杀</span>
+      <span class="tag" v-if="info.promoStatus>1">
+        秒杀价 <span>{{info.promoPrice}}元</span>
+      </span>
       <span class="word">{{info.title}}</span>
     </div>
     <div class="desc">
@@ -58,7 +60,7 @@
       </div>
       <div class="right">
         <mt-button 
-          v-if="owner"
+          v-if="info.isBusiness"
           class="btn" 
           type="primary"
           size="small" 
@@ -79,8 +81,8 @@
 <script>
 import orderApi from '@/api/order';
 import itemApi from '@/api/item';
-import userTool from '../../assets/utils/user';
 import Vue from 'vue'
+import timeTool from '../../assets/utils/time';
 import { Cell, Toast, Indicator } from 'mint-ui';
 
 Vue.component(Toast.name, Toast, Cell.name, Cell);
@@ -93,8 +95,7 @@ export default {
     return {
       item_id: 0,
       info: {},
-      owner: false,
-      userInfo: {},
+      clock: ''
     }
   },
   computed: {
@@ -105,38 +106,45 @@ export default {
     if (!this.$route.query.id) {
       window.history.back()
     }
-    this.item_id = this.$route.query.id
+    this.item_id = parseInt(this.$route.query.id)
     this.getDetail()
-    this.getUserInfo()
   },
   methods: {
-    getUserInfo() {
-      this.userInfo = userTool.getUserInfo();
-      if (Object.keys(this.userInfo).length === 0) {
-        userTool.saveStorage()
-      }
-    },
     getDetail() {
       Indicator.open({text: '加载中...', spinnerType: 'fading-circle'})
       itemApi.getDetail(this.item_id).then((result) => {
         Indicator.close();
         if (result.status === 'success') {
-          this.info = result.data.item
-          this.owner = result.data.owner
+          this.info = result.data
           if (this.info.imgUrl) {
             this.info.imgUrl = JSON.parse(this.info.imgUrl)
           }
+          this.initClock()
         }
       }).catch((err) => {
         Toast(err)
       });
+    },
+    initClock() {
+      const now = timeTool.getDateTimeByTimestamp()
+      let interval = ''
+      let word = ''
+      // 未开始
+      if (this.info.promoStatus === 1) {
+        word = '距离秒杀开始剩下：'
+        interval = timeTool.getInterval(this.info.promoStartDate, now)
+      } else {
+        word = '距离秒杀结束剩下：'
+        interval = timeTool.getInterval(now, this.info.promoEndDate)
+      }
+      this.clock = word + interval
     },
     handleEdit() {
 
     },
     handleBuy() {
       Indicator.open({text: '加载中...', spinnerType: 'fading-circle'})
-      orderApi.add(this.item_id, 1).then((result) => {
+      orderApi.add(this.item_id, this.info.promoId, 1).then((result) => {
         Indicator.close();
         if (result.status === 'success') {
           Toast("购买成功，准备发货啦。。")
@@ -179,6 +187,9 @@ export default {
           padding-bottom: 5px;
           padding-top: 5px;
         }
+        .time {
+          font-size: 12px;
+        }
       }
     }
     .right {
@@ -211,6 +222,9 @@ export default {
       color: white;
       padding: 5px;
       font-size: 12px;
+    }
+    .promo-text {
+      text-decoration: line-through;
     }
     .sales {
       border-radius: 5px;

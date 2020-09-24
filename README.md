@@ -1,4 +1,5 @@
 # miaosha-frontend
+> 这个一个模仿Instagram移动端的项目，前端使用vuejs3.0，后端使用springboot2，欢迎各位star
 
 ## Project setup
 ```
